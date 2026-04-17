@@ -1,5 +1,5 @@
 build:
-    go build -o bin/tojalB3
+	@go build -o bin/tojalB3 cmd/main.go
 
 run: build
-    ./bin/tojalB3
+	@./bin/tojalB3
