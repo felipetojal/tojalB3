@@ -1,22 +1,34 @@
-## TOJALB3
+# TOJALB3: A Custom Block Storage Engine
 
-While taking the AWS Certified Cloud Practioner course, I was presented to three storage concepts: Block, File and Object. I could understand the 
-File and Object ones, but the Block Storage was a little confusing to me. So I had an idea: why not try and implement one myself (not at the same level as the Amazon one, but the same fundamentals and logic behind it)? Following this, i started this project.
+## THE ORIGIN STORY 
 
-The goal is to implement a Block Storage Engine Inode with a CLI interface allowing the user to upload, delete, get and list files. The file uploaded
-by the user will be cut into pieces (4KB per piece), and each piece will occupy a spot in the volume file. Each block (piece) is different from the
-other, not allowing duplicates. This will be possible by creating a hash for each block using SHA-256, because it creates a hash based on the file
-contents. Following the upload, we need to create something called a manifest. The manifest is responsible for holding the metadata from the original 
-file. We will use this manifest to make lookups, retrieve and delete files.
+While studying for the **AWS Certified Cloud Practitioner**, I was introduced to the three main storage concepts: File, Object, and 
+Block Storage. While File and Object storage were highly intuitive, the mechanics under the hood of Block Storage fascinated me. 
 
-# HIGH LEVEL DIAGRAM
+Instead of just memorizing the concept for the exam, I decided to build one from scratch. **TOJALB3** is a custom, single-node 
+Block Storage Engine built to replicate the core fundamentals and logic behind enterprise-grade systems like Amazon EBS.
 
+## KEY FEATURES
+
+* **File Chunking:** Large files are seamlessly chunked into fixed `4KB` blocks in-memory before being flushed to the disk, keeping RAM consumption negligible regardless of file size.
+* **Content-Addressable Storage (Deduplication):** By hashing block contents using `SHA-256`, the engine ensures that identical data blocks are never saved twice. If multiple users upload files sharing the same bytes, they reference the same physical space.
+* **Volume Management:** Avoids the overhead of the OS file system by managing its own single, massive `volume.dat` file, navigating via bitwise offsets.
+* **Interactive CLI:** Built with Bubble Tea, featuring a responsive terminal UI to handle uploads, deletions, and file tree visualization.
+
+## TECH STACK
+
+* **Language:** Go
+* **TUI Framework:** [Bubble Tea](https://github.com/charmbracelet/bubbletea)
+* **Metadata Database:** [Insert KV Database here, e.g., BadgerDB or JSON for now]
+
+## ARCHITECTURE
+
+### HIGH LEVEL DIAGRAM
+
+*This diagram illustrates the user interaction and the operational flow for uploading, retrieving, and deleting files.*
 ![High-level diagram](tojalB3-Diagrams/tojalB3-HighLevelDiagramImage.png)
 
-This is a top level overview of the interaction between user/software and the minimized logic flow of the operations.
+### ARCHITECTURAL DIAGRAM
 
-# ARCHITECTURAL DIAGRAM
-
+*This diagram represents the core structs and the "Enterprise" deduplication strategy using an Index Table (The Bridge) to separate Logical Manifests from Physical Volume Blocks.*
 ![Architectural diagram](tojalB3-Diagrams/tojalB3-ArchitecturalDiagramImage.png)
-
-This is a more in-depth representation containing the main structs/classes that allow the operation.
