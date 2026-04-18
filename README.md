@@ -17,6 +17,6 @@ This is a top level overview of the interaction between user/software and the mi
 
 # ARCHITECTURAL DIAGRAM
 
-[!Architectural diagram](tojalB3-Diagrams/tojalB3-ArchitecturalDiagramImage.png)
+![Architectural diagram](tojalB3-Diagrams/tojalB3-ArchitecturalDiagramImage.png)
 
 This is a more in-depth representation containing the main structs/classes that allow the operation.
