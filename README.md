@@ -11,12 +11,12 @@ file. We will use this manifest to make lookups, retrieve and delete files.
 
 # HIGH LEVEL DIAGRAM
 
-![High-level diagram](tojalb3-Diagrams/tojalb3-HighLevelDiagramImage.png)
+![High-level diagram](tojalB3-Diagrams/tojalB3-HighLevelDiagramImage.png)
 
 This is a top level overview of the interaction between user/software and the minimized logic flow of the operations.
 
 # ARCHITECTURAL DIAGRAM
 
-[!Architectural diagram](tojalb3-Diagrams/tojalb3-ArchitecturalDiagramImage.png)
+[!Architectural diagram](tojalB3-Diagrams/tojalB3-HighLevelDiagramImage.png)
 
 This is a more in-depth representation containing the main structs/classes that allow the operation.
