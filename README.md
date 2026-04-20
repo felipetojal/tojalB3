@@ -26,9 +26,11 @@ Block Storage Engine built to replicate the core fundamentals and logic behind e
 ### HIGH LEVEL DIAGRAM
 
 *This diagram illustrates the user interaction and the operational flow for uploading, retrieving, and deleting files.*
+
 ![High-level diagram](tojalB3-Diagrams/tojalB3-HighLevelDiagramImage.png)
 
 ### ARCHITECTURAL DIAGRAM
 
 *This diagram represents the core structs and the "Enterprise" deduplication strategy using an Index Table (The Bridge) to separate Logical Manifests from Physical Volume Blocks.*
+
 ![Architectural diagram](tojalB3-Diagrams/tojalB3-ArchitecturalDiagramImage.png)
