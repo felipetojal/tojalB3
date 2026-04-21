@@ -1,11 +1,11 @@
 package engine
 
 import (
+	"errors"
 	"fmt"
+	"io"
 	"log"
 	"os"
-
-	"github.com/felipetojal/tojalB3/internal/storage"
 )
 
 const (
@@ -35,13 +35,30 @@ func processFile(filepath string) error {
 			return fmt.Errorf("error reading bytes: %w", err)
 		}
 
+		// This will verify if the error reading the file
+		// occurred because of the end of the file.
+		if errors.Is(err, io.EOF) {
+			log.Println("file has reached the end.")
+			break
+		}
+
+		// Generating the hash based on SHA-256.
 		hash, err := generateHash(buf)
 		if err != nil {
 			log.Println("error generating hash")
 			return err
 		}
 
-		storage.NewIndex(hash)
+		/*
+		* Once we have the block hash, we must verify if it
+		* already exists in the index table. If it already exists,
+		* we increment the reference count. If it doesn´t exist,
+		* we must find a place to store it using the bit map.
+		 */
+
+		// Skipping the block size to read the next block.
+		f.Seek(BLOCK_SIZE, 1)
+
 	}
 
 	return nil
