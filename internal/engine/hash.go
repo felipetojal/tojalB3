@@ -5,13 +5,13 @@ import (
 	"fmt"
 )
 
-// This function takes in the bytes in the block,
-// calculates the hash and then return it.
+// This function takes in bytes, calculates
+// the hash and then return it as a string.
 func generateHash(block []byte) (string, error) {
 	h := sha256.New()
 	_, err := h.Write(block)
 	if err != nil {
-		return "", fmt.Errorf("error generating block hash: %w", err)
+		return "", fmt.Errorf("error generating hash: %w", err)
 	}
 
 	hash := h.Sum(nil)
