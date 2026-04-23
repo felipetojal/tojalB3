@@ -16,7 +16,7 @@ type BitMap struct {
 	bitMap []byte
 }
 
-type bitmap interface {
+type bitMap interface {
 	freePosition(int)
 	occupyPosition(int)
 	loadBitMap(*File) (*BitMap, error)
