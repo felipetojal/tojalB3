@@ -7,7 +7,7 @@ import (
 
 // This function takes in bytes, calculates
 // the hash and then return it as a string.
-func generateHash(block []byte) (string, error) {
+func GenerateHash(block []byte) (string, error) {
 	h := sha256.New()
 	_, err := h.Write(block)
 	if err != nil {
