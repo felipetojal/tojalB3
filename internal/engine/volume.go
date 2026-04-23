@@ -44,3 +44,11 @@ type VolumeManager struct {
 	// in the volumeFile.
 	bitMap []int8
 }
+
+// NewVolumeManager creates a new VolumeManager instance.
+func NewVolumeManager(volumeFile *os.File, bitMap []int8) *VolumeManager {
+	return &VolumeManager{
+		volumeFile: volumeFile,
+		bitMap:     bitMap,
+	}
+}
