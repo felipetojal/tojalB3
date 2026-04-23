@@ -16,6 +16,12 @@ type BitMap struct {
 	bitMap []byte
 }
 
+type bitmap interface {
+	freePosition(int)
+	occupyPosition(int)
+	loadBitMap(*File) (*BitMap, error)
+}
+
 // freePosition frees the position at the given index.
 // position is the block index in the volume.
 func (b *BitMap) freePosition(position int) {
