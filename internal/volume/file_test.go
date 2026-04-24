@@ -31,9 +31,33 @@ func TestReadBitMap(t *testing.T) {
 	assert.Nil(err)
 	assertFileNotNil(t, f)
 
+	// Write the bit map to the file.
+	bitMap := []byte{34, 132, 54, 32, 9}
+	err = f.writeBitMap(bitMap)
+	assert.Nil(err)
+
+	// Read the bit map from the file.
 	b, err := f.readBitMap()
 	assert.Nil(err)
 	assert.NotEqual(0, len(b))
+}
+
+// TestWriteBitMap tests writing the bitmap to a file.
+func TestWriteBitMap(t *testing.T) {
+	assert := assert.New(t)
+
+	// Create a temporary directory for the test.
+	testFile := testFilePath(t, "volume_test.dat")
+
+	// Create a new file.
+	f, err := newFile(testFile)
+	assert.Nil(err)
+	assertFileNotNil(t, f)
+
+	// Write the bit map to the file.
+	bitMap := []byte{34, 132, 54, 32, 9}
+	err = f.writeBitMap(bitMap)
+	assert.Nil(err)
 }
 
 // testFilePath returns the path to a test file in the temporary directory.

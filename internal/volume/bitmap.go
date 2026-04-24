@@ -64,30 +64,3 @@ func (b *BitMap) occupyPosition(position int) error {
 
 	return nil
 }
-
-// loadBitMap loads the bit map from the volume file.
-func loadBitMap(f *File) (*BitMap, error) {
-	bitmap := make([]byte, BitMapSize)
-	// If the volume file is empty, initialize it with the initial file size.
-	if f.info.Size() == 0 {
-		// Initializing the bitMap with 0s.
-		err := f.writeBitMap(bitmap)
-		if err != nil {
-			return nil, err
-		}
-
-		return &BitMap{
-			bitMap: bitmap,
-		}, nil
-	}
-
-	// Read the bitmap from the volume file.
-	bitmap, err := f.readBitMap()
-	if err != nil {
-		return nil, err
-	}
-
-	return &BitMap{
-		bitMap: bitmap,
-	}, nil
-}

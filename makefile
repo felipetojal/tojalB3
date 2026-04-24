@@ -3,3 +3,9 @@ build:
 
 run: build
 	@./bin/tojalB3
+
+test:
+	@go test -cover ./...
+
+cover:
+	@go test -coverprofile=/tmp/data/cover/coverage.out ./...

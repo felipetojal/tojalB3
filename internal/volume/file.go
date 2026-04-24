@@ -2,6 +2,7 @@ package volume
 
 import (
 	"fmt"
+	"io"
 	"os"
 )
 
@@ -31,7 +32,11 @@ func newFile(filePath string) (*File, error) {
 
 // readBitMap reads the bitmap from the volume file.
 func (f *File) readBitMap() ([]byte, error) {
+	// Seek back to the start of the file before reading.
+	f.file.Seek(0, io.SeekStart)
+
 	buf := make([]byte, BitMapSize)
+	// Read the bitmap from the file at offset 0.
 	_, err := f.file.Read(buf)
 	if err != nil {
 		return nil, fmt.Errorf("error reading bitmap: %w", err)

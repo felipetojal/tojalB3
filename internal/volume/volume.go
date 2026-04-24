@@ -4,10 +4,6 @@ import (
 	"log"
 )
 
-const (
-	filePath = "/tmp/data/volume.dat"
-)
-
 // VolumeManager manages the volume file and bit map.
 type VolumeManager struct {
 	// volumeFile is the file that holds the raw bytes
@@ -19,7 +15,7 @@ type VolumeManager struct {
 }
 
 // NewVolumeManager creates a new VolumeManager instance.
-func NewVolumeManager() *VolumeManager {
+func NewVolumeManager(filePath string) *VolumeManager {
 	// Create a new volume file.
 	volumeFile, err := newFile(filePath)
 	if err != nil {
@@ -39,7 +35,29 @@ func NewVolumeManager() *VolumeManager {
 	}
 }
 
-func (v *VolumeManager) StoreBlock(block []byte) error {
+// loadBitMap loads the bit map from the volume file.
+func loadBitMap(f *File) (*BitMap, error) {
+	bitmap := make([]byte, BitMapSize)
+	// If the volume file is empty, initialize it with the initial file size.
+	if f.info.Size() == 0 {
+		// Initializing the bitMap with 0s.
+		err := f.writeBitMap(bitmap)
+		if err != nil {
+			return nil, err
+		}
 
-	return nil
+		return &BitMap{
+			bitMap: bitmap,
+		}, nil
+	}
+
+	// Read the bitmap from the volume file.
+	bitmap, err := f.readBitMap()
+	if err != nil {
+		return nil, err
+	}
+
+	return &BitMap{
+		bitMap: bitmap,
+	}, nil
 }
