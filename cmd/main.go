@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 
@@ -48,14 +47,4 @@ loop:
 		offset++
 		f.Seek(int64(block_size*offset), 0)
 	}
-}
-
-func run() error {
-	// If the file already exists, it will be opened,
-	// if not, it will be created.
-	_, err := os.OpenFile("/data/volume.dat", os.O_CREATE|os.O_APPEND|os.O_RDWR, 0666)
-	if err != nil {
-		return fmt.Errorf("error opening volume.dat file: %w", err)
-	}
-
 }

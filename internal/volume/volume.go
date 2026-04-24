@@ -14,11 +14,6 @@ type VolumeManager struct {
 	bitMap *BitMap
 }
 
-type volumeManager interface {
-	StoreBlock(block []byte) (error)
-	GetBlock(position int) ([]byte)
-}
-
 // NewVolumeManager creates a new VolumeManager instance.
 func NewVolumeManager() *VolumeManager {
 	// Create a new volume file.
@@ -40,8 +35,7 @@ func NewVolumeManager() *VolumeManager {
 	}
 }
 
-func (v *VolumeManager) StoreBlock(block []byte) (error) {
-	
+func (v *VolumeManager) StoreBlock(block []byte) error {
 
 	return nil
 }

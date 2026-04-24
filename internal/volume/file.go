@@ -11,10 +11,6 @@ type File struct {
 	info os.FileInfo
 }
 
-type file interface {
-	readBitMap() ([]byte, error)
-}
-
 // newFile creates a new File instance by opening the volume file on the filesystem.
 func newFile() (*File, error) {
 	f, err := os.OpenFile("/tmp/data/volume.dat", os.O_CREATE|os.O_RDWR|os.O_APPEND, 0666)
@@ -42,4 +38,14 @@ func (f *File) readBitMap() ([]byte, error) {
 	}
 
 	return buf, nil
+}
+
+// writeBitMap writes the bitmap to the volume file.
+func (f *File) writeBitMap(bitMap []byte) error {
+	_, err := f.file.Write(bitMap)
+	if err != nil {
+		return fmt.Errorf("error writing bitmap: %w", err)
+	}
+
+	return nil
 }

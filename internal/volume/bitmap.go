@@ -1,7 +1,11 @@
 package volume
 
+import (
+	"fmt"
+)
+
 const (
-	BitMapSize = 4096
+	BitMapSize = 40960
 )
 
 // BitMap represents the occupied and free positions
@@ -16,15 +20,12 @@ type BitMap struct {
 	bitMap []byte
 }
 
-type bitMap interface {
-	freePosition(int)
-	occupyPosition(int)
-	loadBitMap(*File) (*BitMap, error)
-}
-
 // freePosition frees the position at the given index.
 // position is the block index in the volume.
-func (b *BitMap) freePosition(position int) {
+func (b *BitMap) freePosition(position int) error {
+	if (position > BitMapSize) || (position < 0) {
+		return fmt.Errorf("index %d out of bounds", position)
+	}
 	/*
 	* Example: Say the position (block index) is 45.
 	* Since we are operating the bits of the bytes, and
@@ -42,11 +43,17 @@ func (b *BitMap) freePosition(position int) {
 	// Setting the byteIndex to 0, indicating that it is
 	// now free.
 	b.bitMap[bitMapIndex] = b.bitMap[bitMapIndex] &^ (1 << byteIndex)
+
+	return nil
 }
 
 // occupyPosition occupies the position at the given index.
 // position is the block index in the volume.
-func (b *BitMap) occupyPosition(position int) {
+func (b *BitMap) occupyPosition(position int) error {
+	if (position > BitMapSize) || (position < 0) {
+		return fmt.Errorf("index %d out of bounds", position)
+	}
+
 	// Getting the right indexes.
 	bitMapIndex := position / 8
 	byteIndex := position % 8
@@ -54,20 +61,28 @@ func (b *BitMap) occupyPosition(position int) {
 	// Setting the byteIndex to 1, indicating that it is
 	// now occupied.
 	b.bitMap[bitMapIndex] = b.bitMap[bitMapIndex] | (1 << byteIndex)
+
+	return nil
 }
 
 // loadBitMap loads the bit map from the volume file.
-func loadBitMap(volume *File) (*BitMap, error) {
+func loadBitMap(f *File) (*BitMap, error) {
 	bitmap := make([]byte, BitMapSize)
 	// If the volume file is empty, initialize it with the initial file size.
-	if volume.info.Size() == 0 {
+	if f.info.Size() == 0 {
+		// Initializing the bitMap with 0s.
+		err := f.writeBitMap(bitmap)
+		if err != nil {
+			return nil, err
+		}
+
 		return &BitMap{
 			bitMap: bitmap,
 		}, nil
 	}
 
 	// Read the bitmap from the volume file.
-	bitmap, err := volume.readBitMap()
+	bitmap, err := f.readBitMap()
 	if err != nil {
 		return nil, err
 	}
