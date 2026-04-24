@@ -12,8 +12,8 @@ type File struct {
 }
 
 // newFile creates a new File instance by opening the volume file on the filesystem.
-func newFile() (*File, error) {
-	f, err := os.OpenFile("/tmp/data/volume.dat", os.O_CREATE|os.O_RDWR|os.O_APPEND, 0666)
+func newFile(filePath string) (*File, error) {
+	f, err := os.OpenFile(filePath, os.O_CREATE|os.O_RDWR|os.O_APPEND, 0666)
 	if err != nil {
 		return nil, err
 	}

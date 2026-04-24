@@ -4,6 +4,10 @@ import (
 	"log"
 )
 
+const (
+	filePath = "/tmp/data/volume.dat"
+)
+
 // VolumeManager manages the volume file and bit map.
 type VolumeManager struct {
 	// volumeFile is the file that holds the raw bytes
@@ -17,7 +21,7 @@ type VolumeManager struct {
 // NewVolumeManager creates a new VolumeManager instance.
 func NewVolumeManager() *VolumeManager {
 	// Create a new volume file.
-	volumeFile, err := newFile()
+	volumeFile, err := newFile(filePath)
 	if err != nil {
 		log.Panic(err)
 	}
