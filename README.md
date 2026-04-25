@@ -19,7 +19,7 @@ Block Storage Engine built to replicate the core fundamentals and logic behind e
 
 * **Language:** Go
 * **TUI Framework:** [Bubble Tea](https://github.com/charmbracelet/bubbletea)
-* **Metadata Database:** [Insert KV Database here, e.g., BadgerDB or JSON for now]
+* **Metadata Database:** [BadgerDB](https://github.com/dgraph-io/badger)
 
 ## ARCHITECTURE
 
