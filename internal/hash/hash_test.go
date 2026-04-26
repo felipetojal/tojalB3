@@ -17,7 +17,7 @@ func TestGenerateHash(t *testing.T) {
 	assert.Nil(err)
 	assert.NotEmpty(s1)
 
-	// Testing the error case.
+	// Testing the error case. 
 	b2 := []byte{}
 	s2, err := GenerateHash(b2)
 	assert.NotNil(err)

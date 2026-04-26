@@ -18,6 +18,19 @@ type Index struct {
 	refCount int
 }
 
+// IndexTable is a struct that maps block hashes
+// to Index objects. This will allow O(1) lookups.
+type IndexTable struct {
+	indexes map[string]Index
+}
+
+// newIndexTable creates a new IndexTable.
+func newIndexTable() (*IndexTable) {
+	return &IndexTable{
+		indexes: make(map[string]Index),
+	}
+}
+
 // newIndex creates a new Index.
 func newIndex(hash string, address int) *Index {
 	return &Index{

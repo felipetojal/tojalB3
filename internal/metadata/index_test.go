@@ -16,3 +16,12 @@ func TestNewIndex(t *testing.T) {
 	i := newIndex(hash, address)
 	a.NotNil(i)
 }
+
+// TestNewTable is responsible for testing
+// the IndexTable constructor.
+func TestNewIndexTable(t *testing.T) {
+	a := assert.New(t)
+
+	it := newIndexTable()
+	a.NotNil(it)
+}
