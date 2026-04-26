@@ -1,4 +1,4 @@
-package database
+package metadata
 
 import (
 	"testing"

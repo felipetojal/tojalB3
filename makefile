@@ -7,5 +7,4 @@ run: build
 test:
 	@go test -cover ./...
 
-cover:
-	@go test -coverprofile=/tmp/data/cover/coverage.out ./...
+

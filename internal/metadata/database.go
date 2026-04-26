@@ -1,4 +1,4 @@
-package database
+package metadata
 
 import (
 	"fmt"
@@ -24,3 +24,5 @@ func NewDatabase(dirPath string) (*Database, error) {
 		db: db,
 	}, nil
 }
+
+

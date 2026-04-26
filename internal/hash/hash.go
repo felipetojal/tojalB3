@@ -11,7 +11,7 @@ func GenerateHash(block []byte) (string, error) {
 	h := sha256.New()
 	n, err := h.Write(block)
 	if err != nil {
-		return "", fmt.Errorf("unable to write hash: %w", err)
+		return "", fmt.Errorf("error writing hash: %w", err)
 	}
 
 	if n == 0 {
@@ -20,5 +20,5 @@ func GenerateHash(block []byte) (string, error) {
 
 	hash := h.Sum(nil)
 
-	return fmt.Sprint(hash), nil
+	return fmt.Sprint(string(hash)), nil
 }
