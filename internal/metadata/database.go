@@ -25,12 +25,6 @@ func NewDatabase(dirPath string) (*Database, error) {
 	}, nil
 }
 
-// func (d *Database) storeObj(key interface{}) (error) {
-// 	err := d.db.Update(func(txn *badger.Txn) error {
-		
-// 		return nil
-// 	})
-// 	return nil
-// }
+
 
 

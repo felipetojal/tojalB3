@@ -18,3 +18,12 @@ func TestNewManifest(t *testing.T) {
 	m := newManifest(fileName, fileDir, fileSize, blocks)
 	a.NotNil(m)
 }
+
+// TestNewManifestTable is responsible for 
+// testing the ManifestTable constructor.
+func TestNewManifestTable(t *testing.T) {
+	a := assert.New(t)
+
+	mt := newManifestTable()
+	a.NotNil(mt)
+}

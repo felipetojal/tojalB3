@@ -82,6 +82,3 @@ func TestAddIndex(t *testing.T) {
 	a.Equal(2, savedIndex2.refCount)
 }
 
-func TestCheckExistence(t *testing.T) {
-
-}

@@ -27,3 +27,16 @@ func newManifest(fileName, fileDir string, fileSize int64, blocks []string) *Man
 		storedAt: time.Now().UTC(),
 	}
 }
+
+// ManifestTable is a struct that holds all 
+// the Manifests saved in the database.
+type ManifestTable struct {
+	manifests map[string]Manifest
+}
+
+// newManifestTable creates a new ManifestTable.
+func newManifestTable() (*ManifestTable) {
+	return &ManifestTable{
+		manifests: make(map[string]Manifest),
+	}
+}
