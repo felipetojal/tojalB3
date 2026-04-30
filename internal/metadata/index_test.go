@@ -15,7 +15,7 @@ func TestNewIndex(t *testing.T) {
 	address := 34
 	i := newIndex(hash, address)
 	a.NotNil(i)
-	a.Equal(1, i.refCount)
+	a.Equal(1, i.RefCount)
 }
 
 // TestNewTable is responsible for testing
@@ -59,14 +59,14 @@ func TestAddIndex(t *testing.T) {
 	address := 45
 	i := newIndex(hash, address)
 	a.NotNil(i)
-	a.Equal(1, i.refCount)
+	a.Equal(1, i.RefCount)
 
 	// Creating the table and adding the Index.
 	it := newIndexTable()
 	a.NotNil(it)
 	it.addIndex(*i)
-	savedIndex1 := it.indexes[i.hash]
-	a.Equal(1, savedIndex1.refCount)
+	savedIndex1 := it.Indexes[i.Hash]
+	a.Equal(1, savedIndex1.RefCount)
 
 	// Checking if the hash we just inserted
 	// is really there.
@@ -78,7 +78,7 @@ func TestAddIndex(t *testing.T) {
 	i2 := newIndex(hash, address)
 	a.NotNil(i2)
 	it.addIndex(*i2)
-	savedIndex2 := it.indexes[i2.hash]
-	a.Equal(2, savedIndex2.refCount)
+	savedIndex2 := it.Indexes[i2.Hash]
+	a.Equal(2, savedIndex2.RefCount)
 }
 

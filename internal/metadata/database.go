@@ -4,10 +4,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"reflect"
 
 	badger "github.com/dgraph-io/badger/v4"
 )
+
+type Storable interface {
+	prefix() string
+}
 
 // Database encapsulates the badger.DB type.
 type Database struct {
@@ -29,17 +32,10 @@ func NewDatabase(dirPath string) (*Database, error) {
 }
 
 // storeObject will be used to store an object to the database.
-func (d *Database) storeObject(key string, value interface{}) error {
-	var prefix string
-
+// Manifest and IndexTable will implement the Storable interface.
+func (d *Database) storeObject(key string, value Storable) error {
 	// Getting the object type.
-	t := reflect.TypeOf(value)
-	switch t.Name() {
-	case "Manifest":
-		prefix = "mani:"
-	case "IndexTable":
-		prefix = "it:"
-	}
+	prefix := value.prefix()
 
 	// Starting the transaction.
 	txn := d.db.NewTransaction(true)
@@ -62,5 +58,10 @@ func (d *Database) storeObject(key string, value interface{}) error {
 		return fmt.Errorf("error commiting transaction: %w", err)
 	}
 
+	return nil
+}
+
+func (d *Database) getObject(key string, dest any) error {
+	// txn := d.db.NewTransaction()
 	return nil
 }
