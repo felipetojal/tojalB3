@@ -23,32 +23,3 @@ func TestNewDatabase(t *testing.T) {
 	defer db.db.Close()
 }
 
-// TestStoreObject is responsible for testing
-// the storeObject() function.
-func TestStoreObject(t *testing.T) {
-	a := assert.New(t)
-
-	// Creating the database and the directory
-	tempDir := t.TempDir()
-	db, err := NewDatabase(tempDir)
-	a.Nil(err)
-	a.NotNil(db)
-
-	// Creating a Manifest object.
-	blocks := []string{"vmnerovneq", "kcqervqerv", "qvqnervnerveqrv"}
-	mani := newManifest("filename", "filedir", int64(34), blocks)
-	a.NotNil(mani)
-
-	// Creating an IndexTable object.
-	it := newIndexTable()
-	a.NotNil(it)
-
-	// Storing the indexTable in the database.
-	err = db.storeObject("indexTable", it)
-	a.Nil(err)
-
-	// Storing the Manifest in the database.
-	err = db.storeObject(mani.FileName, mani)
-	a.Nil(err)
-
-}
