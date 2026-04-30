@@ -31,6 +31,17 @@ func NewDatabase(dirPath string) (*Database, error) {
 	}, nil
 }
 
+/**
+
+I made a hybrid architecture that allow both types to be stored
+with the same function but I am not sure if it is the best way.
+
+Problably going with a function for each will be clearer and
+less ambiguous. It would add some boilerplate code but at the
+end of the day it would be less bug prone.
+
+**/
+
 // storeObject will be used to store an object to the database.
 // Manifest and IndexTable will implement the Storable interface.
 func (d *Database) storeObject(key string, value Storable) error {
