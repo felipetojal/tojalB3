@@ -33,17 +33,6 @@ func NewDatabase(dirPath string) (*Database, error) {
 	}, nil
 }
 
-/**
-
-I made a hybrid architecture that allow both types to be stored
-with the same function but I am not sure if it is the best way.
-
-Problably going with a function for each will be clearer and
-less ambiguous. It would add some boilerplate code but at the
-end of the day it would be less bug prone.
-
-**/
-
 // storeManifest is responsible for storing a Manifest in the
 // database. It returns an error in case of failure
 func (d *Database) StoreManifest(m *Manifest) error {
@@ -140,12 +129,12 @@ func (d *Database) LoadIndexTable() (*IndexTable, error) {
 	defer txn.Discard()
 	item, err := txn.Get(key)
 	if err != nil {
-		// If the program is used for the first time, then we won´t have 
-		// an IndexTable stored in the database. So we need to let that 
+		// If the program is used for the first time, then we won´t have
+		// an IndexTable stored in the database. So we need to let that
 		// error go and return a new index table to the user, whom will
-		// further store the new IndexTable to the database again. 
+		// further store the new IndexTable to the database again.
 		if errors.Is(err, badger.ErrKeyNotFound) {
-			return newIndexTable(), nil 
+			return newIndexTable(), nil
 		}
 
 		return nil, fmt.Errorf("error loading index table from database: %w", err)
