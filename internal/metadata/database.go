@@ -2,6 +2,7 @@ package metadata
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 
 	badger "github.com/dgraph-io/badger/v4"
@@ -45,7 +46,7 @@ end of the day it would be less bug prone.
 
 // storeManifest is responsible for storing a Manifest in the
 // database. It returns an error in case of failure
-func (d *Database) StoreManifest(m Manifest) error {
+func (d *Database) StoreManifest(m *Manifest) error {
 	// Converting the Manifest to bytes.
 	mBytes, err := json.Marshal(m)
 	if err != nil {
@@ -102,7 +103,7 @@ func (d *Database) LoadManifest(key string) (*Manifest, error) {
 
 // StoreIndexTable is responsible for storing the IndexTable
 // in the database. It returns an error.
-func (d *Database) StoreIndexTable(it IndexTable) error {
+func (d *Database) StoreIndexTable(it *IndexTable) error {
 	// Converting the IndexTable to JSON bytes.
 	itJson, err := json.Marshal(it)
 	if err != nil {
@@ -139,6 +140,14 @@ func (d *Database) LoadIndexTable() (*IndexTable, error) {
 	defer txn.Discard()
 	item, err := txn.Get(key)
 	if err != nil {
+		// If the program is used for the first time, then we won´t have 
+		// an IndexTable stored in the database. So we need to let that 
+		// error go and return a new index table to the user, whom will
+		// further store the new IndexTable to the database again. 
+		if errors.Is(err, badger.ErrKeyNotFound) {
+			return newIndexTable(), nil 
+		}
+
 		return nil, fmt.Errorf("error loading index table from database: %w", err)
 	}
 
