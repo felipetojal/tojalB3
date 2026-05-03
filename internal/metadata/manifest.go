@@ -7,7 +7,6 @@ import "time"
 type Manifest struct {
 	// File basic information.
 	FileName string `json:"fileName"`
-	FileDir  string `json:"fileDir"`
 	FileSize int64  `json:"fileSize"`
 
 	// All the block hashes associated to the file.
@@ -18,10 +17,9 @@ type Manifest struct {
 }
 
 // newManifest creates a new Manifest.
-func newManifest(fileName, fileDir string, fileSize int64, blocks []string) *Manifest {
+func newManifest(fileName string, fileSize int64, blocks []string) *Manifest {
 	return &Manifest{
 		FileName: fileName,
-		FileDir:  fileDir,
 		FileSize: fileSize,
 		Blocks:   blocks,
 		StoredAt: time.Now().UTC(),

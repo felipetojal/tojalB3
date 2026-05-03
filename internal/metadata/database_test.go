@@ -38,10 +38,9 @@ func TestStoreManifest(t *testing.T) {
 
 	// Creating the manifest to be stored.
 	fileName := "opa.png"
-	fileDir := "/josias/"
 	blocks := []string{"mvwe", "pemw", "egvwoerng-", "gmkwenrg2455g24"}
 	fileSize := int64(34)
-	m := newManifest(fileName, fileDir, fileSize, blocks)
+	m := newManifest(fileName, fileSize, blocks)
 	a.NotNil(m)
 
 	// Storing the Manifest.
@@ -62,10 +61,9 @@ func TestLoadManifest(t *testing.T) {
 
 	// Creating the manifest to be stored.
 	fileName := "opa.png"
-	fileDir := "/josias/"
 	blocks := []string{"mvwe", "pemw", "egvwoerng-", "gmkwenrg2455g24"}
 	fileSize := int64(34)
-	m := newManifest(fileName, fileDir, fileSize, blocks)
+	m := newManifest(fileName, fileSize, blocks)
 	a.NotNil(m)
 
 	// Storing the Manifest.
