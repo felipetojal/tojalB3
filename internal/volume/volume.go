@@ -1,6 +1,7 @@
 package volume
 
 import (
+	"fmt"
 	"log"
 )
 
@@ -33,6 +34,34 @@ func NewVolumeManager(filePath string) *VolumeManager {
 		volumeFile: volumeFile,
 		bitMap:     bitMap,
 	}
+}
+
+// This function is responsible for storing the block in
+// the volume file and signaling the bitmap occupation.
+func (v *VolumeManager) StoreBlock(block []byte) error {
+	// Getting the position to store the block
+	pos, err := v.bitMap.getNextFreePosition()
+	if err != nil {
+		return fmt.Errorf("error getting freePosition storeBlock(): %w", err)
+	}
+
+	// Storing the block.
+	if err := v.volumeFile.writeBlock(block, pos); err != nil {
+		return err
+	}
+
+	// Since the position was occupied, we must signal it
+	// to the system.
+	if err := v.bitMap.occupyPosition(pos); err != nil {
+		return fmt.Errorf("error occupyPosition storeBlock(): %w", err)
+	}
+
+	// Saving the new bitmap.
+	if err := v.volumeFile.writeBitMap(v.bitMap.bitMap); err != nil {
+		return fmt.Errorf("error saving bitmap storeBlock: %w", err)
+	}
+
+	return nil
 }
 
 // loadBitMap loads the bit map from the volume file.

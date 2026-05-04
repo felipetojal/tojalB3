@@ -55,7 +55,7 @@ func (e *Engine) StoreFile(filePath string) error {
 	// Creating and reading the buffer.
 	buf := make([]byte, block_size)
 	endOfFile := false
-	offset := 0
+	fileOffset := 0
 	// Now, we need to read each chunk of the file.
 	for !endOfFile {
 		// Reading the block and checking possible errors.
@@ -89,13 +89,18 @@ func (e *Engine) StoreFile(filePath string) error {
 			v.RefCount++
 			e.it.Indexes[blockHash] = v
 		} else {
-			i = metadata.NewIndex(blockHash, offset)
+			i = metadata.NewIndex(blockHash, fileOffset)
+			e.it.Indexes[blockHash] = *i
 		}
+
+		// Once we created the index and the manifest, we 
+		// proceed to store it in the volume.
+		
 		
 		// At the end of the iteration, we must move
 		// the file pointer to the next chunk of bytes.
-		offset++
-		of, err := f.Seek(0, offset*block_size)
+		fileOffset++
+		of, err := f.Seek(0, fileOffset*block_size)
 		if err != nil {
 			return fmt.Errorf("error changing offset: %w", err)
 		}
