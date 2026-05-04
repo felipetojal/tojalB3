@@ -45,7 +45,7 @@ func newIndexTable() *IndexTable {
 // getIndex receives a block hash and returns the
 // index with the block information.
 func (it *IndexTable) getIndex(hash string) (*Index, error) {
-	if !checkExistence(it, hash) {
+	if !it.CheckExistence(hash) {
 		return nil, fmt.Errorf("error: hash does not exist in IndexTable.")
 	}
 
@@ -65,7 +65,7 @@ func (it *IndexTable) addIndex(i Index) {
 	// the same value as i.
 	index := i
 	// Check the existence of the given hash.
-	if checkExistence(it, hash) {
+	if it.CheckExistence(hash) {
 		// If it the hash does exist, we update the refCount.
 		index = it.Indexes[hash]
 		index.RefCount = index.RefCount + 1
@@ -77,8 +77,8 @@ func (it *IndexTable) addIndex(i Index) {
 
 // checkExistence is an auxiliary function used to check
 // if a block hash already exists in the IndexTable.
-func checkExistence(it *IndexTable, hash string) bool {
-	_, ok := it.Indexes[hash]
+func (i *IndexTable) CheckExistence(hash string) bool {
+	_, ok := i.Indexes[hash]
 	return ok
 }
 

@@ -38,30 +38,32 @@ func NewVolumeManager(filePath string) *VolumeManager {
 
 // This function is responsible for storing the block in
 // the volume file and signaling the bitmap occupation.
-func (v *VolumeManager) StoreBlock(block []byte) error {
+// It returns the position of the block and a possible error.
+func (v *VolumeManager) StoreBlock(block []byte) (int, error) {
 	// Getting the position to store the block
 	pos, err := v.bitMap.getNextFreePosition()
 	if err != nil {
-		return fmt.Errorf("error getting freePosition storeBlock(): %w", err)
+		return -1, fmt.Errorf("error getting freePosition storeBlock(): %w", err)
 	}
 
 	// Storing the block.
 	if err := v.volumeFile.writeBlock(block, pos); err != nil {
-		return err
+		return -1, err
 	}
 
 	// Since the position was occupied, we must signal it
 	// to the system.
 	if err := v.bitMap.occupyPosition(pos); err != nil {
-		return fmt.Errorf("error occupyPosition storeBlock(): %w", err)
+		return -1, fmt.Errorf("error occupyPosition storeBlock(): %w", err)
 	}
 
 	// Saving the new bitmap.
 	if err := v.volumeFile.writeBitMap(v.bitMap.bitMap); err != nil {
-		return fmt.Errorf("error saving bitmap storeBlock: %w", err)
+		return -1, fmt.Errorf("error saving bitmap storeBlock: %w", err)
 	}
 
-	return nil
+	// pos is the absolue position of the block in the volume.
+	return pos, nil
 }
 
 // loadBitMap loads the bit map from the volume file.

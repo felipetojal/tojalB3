@@ -38,15 +38,10 @@ func (e *Engine) StoreFile(filePath string) error {
 	}
 
 	// Openning the file.
-	f, err := os.OpenFile(filePath, os.O_RDONLY, 0644)
+	f, fileSize, err := openFile(filePath)
 	if err != nil {
-		return fmt.Errorf("error opening file %v: %w", filePath, err)
+		return err
 	}
-	fileInfo, err := f.Stat()
-	if err != nil {
-		return fmt.Errorf("error creating fileInfo: %w", err)
-	}
-	fileSize := fileInfo.Size()
 	defer f.Close()
 
 	// Since the file does not exist, we create a new Manifest.
@@ -59,15 +54,9 @@ func (e *Engine) StoreFile(filePath string) error {
 	// Now, we need to read each chunk of the file.
 	for !endOfFile {
 		// Reading the block and checking possible errors.
-		err := readBlock(f, buf)
+		err := readBlock(f, buf, endOfFile)
 		if !errors.Is(err, io.EOF) {
 			return err
-		}
-		// If the end of the file was reached, then
-		// we must signal so stop the loop on this
-		// iteration.
-		if errors.Is(err, io.EOF) {
-			endOfFile = true
 		}
 
 		// Now that the bytes are in the buffer, we must
@@ -76,33 +65,15 @@ func (e *Engine) StoreFile(filePath string) error {
 		if err != nil {
 			return err
 		}
+
+		// Checking if the hash already exists
 		// Adding the block hash to the manifest pointer.
 		mani.AddBlock(blockHash)
 
-		// Declaring the index.
-		var i *metadata.Index
-
-		// Before creating a new index, we check if that same
-		// block already exists in the volume.
-		v, ok := e.it.Indexes[blockHash]
-		if ok {
-			v.RefCount++
-			e.it.Indexes[blockHash] = v
-		} else {
-			i = metadata.NewIndex(blockHash, fileOffset)
-			e.it.Indexes[blockHash] = *i
-		}
-
-		// Once we created the index and the manifest, we 
-		// proceed to store it in the volume.
-		
-		
 		// At the end of the iteration, we must move
 		// the file pointer to the next chunk of bytes.
-		fileOffset++
-		of, err := f.Seek(0, fileOffset*block_size)
-		if err != nil {
-			return fmt.Errorf("error changing offset: %w", err)
+		if err := advanceOffset(f, fileOffset); err != nil {
+			return err
 		}
 	}
 
@@ -112,7 +83,7 @@ func (e *Engine) StoreFile(filePath string) error {
 // readBlock is responsible for reading the block from
 // the file. It returns the buffer from the read and
 // an error.
-func readBlock(f *os.File, buf []byte) error {
+func readBlock(f *os.File, buf []byte, endOfFile bool) error {
 	n, err := f.Read(buf)
 	if !errors.Is(err, io.EOF) {
 		return fmt.Errorf("error reading block: %w", err)
@@ -123,8 +94,36 @@ func readBlock(f *os.File, buf []byte) error {
 	// So we need to complete the remaining bytes with zeros(padding).
 	if n < block_size {
 		clear(buf[n:])
+		endOfFile = true
 		return err
 	}
 
+	return nil
+}
+
+// Auxiliary function to open a given filePath.
+func openFile(filePath string) (*os.File, int64, error) {
+	// Openning the file.
+	f, err := os.OpenFile(filePath, os.O_RDONLY, 0644)
+	if err != nil {
+		return nil, 0, fmt.Errorf("error opening file %v: %w", filePath, err)
+	}
+	fileInfo, err := f.Stat()
+	if err != nil {
+		return nil, 0, fmt.Errorf("error creating fileInfo: %w", err)
+	}
+	fileSize := fileInfo.Size()
+
+	return f, fileSize, nil
+}
+
+// Auxiliary function to advance the pointer of the
+// file offset.
+func advanceOffset(f *os.File, fileOffset int) error {
+	_, err := f.Seek(int64(fileOffset)*block_size, 0)
+	fileOffset++
+	if err != nil {
+		return fmt.Errorf("error changing offset: %w", err)
+	}
 	return nil
 }

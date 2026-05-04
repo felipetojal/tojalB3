@@ -6,7 +6,6 @@ import (
 
 const (
 	BitMapSize = 40960
-	block_size = 4096
 )
 
 // BitMap represents the occupied and free positions
@@ -69,7 +68,7 @@ func (b *BitMap) occupyPosition(position int) error {
 // getNextFreePosition returns the position of the next free block.
 func (b *BitMap) getNextFreePosition() (int, error) {
 	// Iterating over the bitmap.
-	for bitMapIndex := 0; bitMapIndex < BitMapSize; bitMapIndex++ {
+	for bitMapIndex := range BitMapSize {
 
 		// The maximum value a byte can have is 255. In this
 		// case, it would be full.
@@ -89,7 +88,7 @@ func (b *BitMap) getNextFreePosition() (int, error) {
 
 // getFreeBit analyzes a byte and returns the bit free position (0 a 7).
 func getFreeBit(b byte) int {
-	for index := 0; index < 8; index++ {
+	for index := range 8 {
 		if (b & (1 << index)) == 0 {
 			return index // Returns only the bit number (ex: 3).
 		}

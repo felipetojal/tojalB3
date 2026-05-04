@@ -70,7 +70,7 @@ func TestAddIndex(t *testing.T) {
 
 	// Checking if the hash we just inserted
 	// is really there.
-	b := checkExistence(it, hash)
+	b := it.CheckExistence(hash)
 	a.True(b)
 
 	// Creating a new index with the same hash.
@@ -81,4 +81,3 @@ func TestAddIndex(t *testing.T) {
 	savedIndex2 := it.Indexes[i2.Hash]
 	a.Equal(2, savedIndex2.RefCount)
 }
-
