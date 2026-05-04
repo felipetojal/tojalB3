@@ -14,6 +14,7 @@ func TestNewManifest(t *testing.T) {
 	fileName := "toddynho.png"
 	fileSize := int64(100)
 	blocks := []string{"oi", "ida", "volta", "naruto"}
-	m := newManifest(fileName, fileSize, blocks)
+	m := NewManifest(fileName, fileSize)
+	m.AddBlock(blocks...)
 	a.NotNil(m)
 }

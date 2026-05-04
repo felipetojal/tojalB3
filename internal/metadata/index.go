@@ -21,7 +21,7 @@ type Index struct {
 }
 
 // newIndex creates a new Index.
-func newIndex(hash string, address int) *Index {
+func NewIndex(hash string, address int) *Index {
 	return &Index{
 		Hash:     hash,
 		Address:  address,

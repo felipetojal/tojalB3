@@ -17,13 +17,18 @@ type Manifest struct {
 }
 
 // newManifest creates a new Manifest.
-func newManifest(fileName string, fileSize int64, blocks []string) *Manifest {
+func NewManifest(fileName string, fileSize int64) *Manifest {
 	return &Manifest{
 		FileName: fileName,
 		FileSize: fileSize,
-		Blocks:   blocks,
+		Blocks:   make([]string, 0),
 		StoredAt: time.Now().UTC(),
 	}
+}
+
+// Auxiliary function to add blocks to the manifest.
+func (m *Manifest) AddBlock(block ...string) {
+	m.Blocks = append(m.Blocks, block...)
 }
 
 func (m *Manifest) prefix() string {

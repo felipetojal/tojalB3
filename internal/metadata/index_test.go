@@ -13,7 +13,7 @@ func TestNewIndex(t *testing.T) {
 
 	hash := "ansognqeorngqenrgafçvqgpfq"
 	address := 34
-	i := newIndex(hash, address)
+	i := NewIndex(hash, address)
 	a.NotNil(i)
 	a.Equal(1, i.RefCount)
 }
@@ -35,7 +35,7 @@ func TestGetIndex(t *testing.T) {
 	// Creating the Index object.
 	hash := "vnwerogvweg23ujg234"
 	address := 45
-	i := newIndex(hash, address)
+	i := NewIndex(hash, address)
 	a.NotNil(i)
 
 	// Creating the table and adding the Index.
@@ -57,7 +57,7 @@ func TestAddIndex(t *testing.T) {
 	// Creating the Index object.
 	hash := "vnwerogvweg23ujg234"
 	address := 45
-	i := newIndex(hash, address)
+	i := NewIndex(hash, address)
 	a.NotNil(i)
 	a.Equal(1, i.RefCount)
 
@@ -75,7 +75,7 @@ func TestAddIndex(t *testing.T) {
 
 	// Creating a new index with the same hash.
 	address = 9
-	i2 := newIndex(hash, address)
+	i2 := NewIndex(hash, address)
 	a.NotNil(i2)
 	it.addIndex(*i2)
 	savedIndex2 := it.Indexes[i2.Hash]
