@@ -21,7 +21,6 @@ type Engine struct {
 
 /*
 What is Engine responsible for?
-
 1 - It must support four operations: store file, load file, delete file, and list all files.
 2 - When storing the file, it must convert it into chunks and store it in the volume.
 */
@@ -37,7 +36,7 @@ func (e *Engine) StoreFile(filePath string) error {
 		return fmt.Errorf("error file already exists: %w", err)
 	}
 
-	// Openning the file.
+	// Opening the file.
 	f, fileSize, err := openFile(filePath)
 	if err != nil {
 		return err
@@ -50,12 +49,11 @@ func (e *Engine) StoreFile(filePath string) error {
 	// Creating and reading the buffer.
 	buf := make([]byte, block_size)
 	endOfFile := false
-	fileOffset := 0
 	// Now, we need to read each chunk of the file.
 	for !endOfFile {
 		// Reading the block and checking possible errors.
-		err := readBlock(f, buf, endOfFile)
-		if !errors.Is(err, io.EOF) {
+		err := readBlock(f, buf, &endOfFile)
+		if !errors.Is(err, io.EOF) && err != nil {
 			return err
 		}
 
@@ -66,16 +64,46 @@ func (e *Engine) StoreFile(filePath string) error {
 			return err
 		}
 
-		// Checking if the hash already exists
-		// Adding the block hash to the manifest pointer.
 		mani.AddBlock(blockHash)
 
-		// At the end of the iteration, we must move
-		// the file pointer to the next chunk of bytes.
-		if err := advanceOffset(f, fileOffset); err != nil {
-			return err
+		// Validating the block existence.
+		if exist := e.it.CheckExistence(blockHash); exist {
+			index := e.it.Indexes[blockHash]
+			index.RefCount++
+			e.it.Indexes[blockHash] = index
+		} else {
+			// If the block is not found in the index table,
+			// we must add it and create the index.
+			if err := e.storeBlock(buf, blockHash); err != nil {
+				return err
+			}
 		}
 	}
+
+	// After the operation is done, we save the manifest in
+	// the database.
+	if err := e.d.StoreManifest(mani); err != nil {
+		return fmt.Errorf("error storing manifest: %w", err)
+	}
+
+	// Storing the index table in the database.
+	if err := e.d.StoreIndexTable(e.it); err != nil {
+		return fmt.Errorf("error storing index table: %w", err)
+	}
+
+	return nil
+}
+
+// Auxiliary funtion to encapsulate the logic to store a block
+// in the volume file.
+func (e *Engine) storeBlock(block []byte, hash string) error {
+	// Checking if the hash already exists
+	// Adding the block hash to the manifest pointer.
+	pos, err := e.v.StoreBlock(block)
+	if err != nil {
+		return err
+	}
+	e.it.Indexes[hash] = *metadata.NewIndex(hash, pos)
 
 	return nil
 }
@@ -83,9 +111,9 @@ func (e *Engine) StoreFile(filePath string) error {
 // readBlock is responsible for reading the block from
 // the file. It returns the buffer from the read and
 // an error.
-func readBlock(f *os.File, buf []byte, endOfFile bool) error {
+func readBlock(f *os.File, buf []byte, endOfFile *bool) error {
 	n, err := f.Read(buf)
-	if !errors.Is(err, io.EOF) {
+	if !errors.Is(err, io.EOF) && err != nil {
 		return fmt.Errorf("error reading block: %w", err)
 	}
 
@@ -94,7 +122,7 @@ func readBlock(f *os.File, buf []byte, endOfFile bool) error {
 	// So we need to complete the remaining bytes with zeros(padding).
 	if n < block_size {
 		clear(buf[n:])
-		endOfFile = true
+		*endOfFile = true
 		return err
 	}
 
@@ -115,15 +143,4 @@ func openFile(filePath string) (*os.File, int64, error) {
 	fileSize := fileInfo.Size()
 
 	return f, fileSize, nil
-}
-
-// Auxiliary function to advance the pointer of the
-// file offset.
-func advanceOffset(f *os.File, fileOffset int) error {
-	_, err := f.Seek(int64(fileOffset)*block_size, 0)
-	fileOffset++
-	if err != nil {
-		return fmt.Errorf("error changing offset: %w", err)
-	}
-	return nil
 }
