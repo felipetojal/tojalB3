@@ -27,6 +27,15 @@ What is Engine responsible for?
 
 const block_size = 4096
 
+// Engine constructor.
+func NewEngine(v *volume.VolumeManager, d *metadata.Database, it *metadata.IndexTable) (*Engine, error) {
+	return &Engine{
+		v:  v,
+		d:  d,
+		it: it,
+	}, nil
+}
+
 // StoreFile will receive the filePath, open the file, split it into chunks,
 // and store each chunk in the volume.
 func (e *Engine) StoreFile(filePath string) error {
