@@ -36,6 +36,20 @@ func NewVolumeManager(filePath string) *VolumeManager {
 	}
 }
 
+// DeleteBlock receives the absolute position of the block
+// and deletes it from the volume and frees the bitmap position.
+func (v *VolumeManager) DeleteBlock(position int) error {
+	if err := v.volumeFile.deleteBlock(position); err != nil {
+		return err
+	}
+
+	if err := v.bitMap.freePosition(position); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // This function is responsible for storing the block in
 // the volume file and signaling the bitmap occupation.
 // It returns the position of the block and a possible error.

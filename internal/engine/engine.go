@@ -103,6 +103,56 @@ func (e *Engine) StoreFile(filePath string) error {
 	return nil
 }
 
+// DeleteFile receives a filePath and deletes the file
+// associated to that filePath. If the is not found or
+// an error occur, an error will be returned.
+func (e *Engine) DeleteFile(filePath string) error {
+	// First, we will load the manifest from the database.
+	m, err := e.d.LoadManifest(filePath)
+	if err != nil {
+		return err
+	}
+
+	// Once we have the manifest, we must iterate over the
+	// blocks and delete (or subtract the refCount) them in
+	// the volume.
+	for _, block := range m.Blocks {
+		if err := e.deleteIndex(block); err != nil {
+			/*
+			 * Maybe it is not right to return an error here. Say any other
+			 * block got deleted before, we cannot delete half of a file.
+			 * We must ensure atomicity. Here, in the delete, and in the store
+			 * part.
+			 */
+			return err
+		}
+	}
+
+	return nil
+}
+
+// Auxiliary function to delete (or subtract) a given
+// index in the manifest.
+func (e *Engine) deleteIndex(block string) error {
+	// Getting the index from the map.
+	i := e.it.Indexes[block]
+
+	// If the reference count is bigger than 1,
+	// we simply subtract the refCount.
+	if i.RefCount > 1 {
+		i.RefCount--
+		e.it.Indexes[block] = i
+		return nil
+	}
+
+	// Deleting the block from the volume file.
+	if err := e.v.DeleteBlock(i.Address); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // Auxiliary funtion to encapsulate the logic to store a block
 // in the volume file.
 func (e *Engine) storeBlock(block []byte, hash string) error {

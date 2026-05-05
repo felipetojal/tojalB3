@@ -90,6 +90,30 @@ func (d *Database) LoadManifest(key string) (*Manifest, error) {
 	return &m, nil
 }
 
+// DeleteManifest will receive the file key (filePath) and
+// delete the file in the database.
+//
+// If the file is not found or an error occur, an error will be returned.
+// If the file is deleted successfully, error will be nil.
+func (d *Database) DeleteManifest(key string) error {
+	// Creating the database transaction.
+	txn := d.db.NewTransaction(true)
+	defer txn.Discard()
+
+	// Creating the ley and deleting the manifest.
+	manifestKey := []byte("mani:" + key)
+	if err := txn.Delete(manifestKey); err != nil {
+		return fmt.Errorf("error deleting manifest from database: %w", err)
+	}
+
+	// Commiting the operation.
+	if err := txn.Commit(); err != nil {
+		return fmt.Errorf("error commiting deletion from database: %w", err)
+	}
+
+	return nil
+}
+
 // StoreIndexTable is responsible for storing the IndexTable
 // in the database. It returns an error.
 func (d *Database) StoreIndexTable(it *IndexTable) error {

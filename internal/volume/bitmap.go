@@ -26,6 +26,10 @@ func (b *BitMap) freePosition(position int) error {
 	if (position > BitMapSize) || (position < 0) {
 		return fmt.Errorf("index %d out of bounds", position)
 	}
+	// Since position is the absolute location of the block,
+	// we must convert it to a bitMap index.
+	position = position - BitMapSize
+
 	/*
 	* Example: Say the position (block index) is 45.
 	* Since we are operating the bits of the bytes, and

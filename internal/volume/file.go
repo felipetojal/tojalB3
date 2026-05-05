@@ -55,8 +55,19 @@ func (f *File) writeBitMap(bitMap []byte) error {
 	return nil
 }
 
-// Auxiliary function to sotre a byte at a given position in the file.
-func (f *File) writeBlock(block []byte, position int) (error) {
+// Auxiliary function to delete a block at a given position in the file.
+func (f *File) deleteBlock(position int) error {
+	buf := make([]byte, 0)
+	n, err := f.file.WriteAt(buf, int64(position))
+	if err != nil {
+		return fmt.Errorf("error writing to file %d bytes written (deleteBlock): %w", n, err)
+	}
+
+	return nil
+}
+
+// Auxiliary function to store a byte at a given position in the file.
+func (f *File) writeBlock(block []byte, position int) error {
 	// Calculating the absolute offset.
 	offset := int64(BitMapSize + (position * 8))
 
