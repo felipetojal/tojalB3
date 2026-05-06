@@ -2,6 +2,7 @@ package hash
 
 import (
 	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
 )
 
@@ -20,5 +21,5 @@ func GenerateHash(block []byte) (string, error) {
 
 	hash := h.Sum(nil)
 
-	return fmt.Sprint(string(hash)), nil
+	return hex.EncodeToString(hash), nil
 }

@@ -6,6 +6,10 @@ import (
 	"os"
 )
 
+const (
+	block_size = 4096
+)
+
 // File represents a volume file on the filesystem.
 type File struct {
 	file *os.File
@@ -57,10 +61,12 @@ func (f *File) writeBitMap(bitMap []byte) error {
 
 // Auxiliary function to delete a block at a given position in the file.
 func (f *File) deleteBlock(position int) error {
-	buf := make([]byte, 0)
-	n, err := f.file.WriteAt(buf, int64(position))
+	buf := make([]byte, block_size)
+	offset := int64(BitMapSize + (position * block_size))
+
+	n, err := f.file.WriteAt(buf, offset)
 	if err != nil {
-		return fmt.Errorf("error writing to file %d bytes written (deleteBlock): %w", n, err)
+		return fmt.Errorf("error secure wiping file (%d bytes written): %w", n, err)
 	}
 
 	return nil

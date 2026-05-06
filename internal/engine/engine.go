@@ -42,7 +42,7 @@ func (e *Engine) StoreFile(filePath string) error {
 	// Now we must check if the file already exists in the database.
 	m, err := e.d.LoadManifest(filePath)
 	if m != nil {
-		return fmt.Errorf("error file already exists: %w", err)
+		return fmt.Errorf("error file already exists")
 	}
 
 	// Opening the file.
@@ -128,6 +128,16 @@ func (e *Engine) DeleteFile(filePath string) error {
 		}
 	}
 
+	// Deleting the manifest from the database.
+	if err := e.d.DeleteManifest(filePath); err != nil {
+		return fmt.Errorf("error deleting manifest: %w", err)
+	}
+
+	// Updating the new Index Table to the database.
+	if err := e.d.StoreIndexTable(e.it); err != nil {
+		return fmt.Errorf("error storing index table: %w", err)
+	}
+
 	return nil
 }
 
@@ -135,7 +145,10 @@ func (e *Engine) DeleteFile(filePath string) error {
 // index in the manifest.
 func (e *Engine) deleteIndex(block string) error {
 	// Getting the index from the map.
-	i := e.it.Indexes[block]
+	i, exists := e.it.Indexes[block]
+	if !exists {
+		return nil
+	}
 
 	// If the reference count is bigger than 1,
 	// we simply subtract the refCount.
@@ -149,6 +162,8 @@ func (e *Engine) deleteIndex(block string) error {
 	if err := e.v.DeleteBlock(i.Address); err != nil {
 		return err
 	}
+
+	delete(e.it.Indexes, block)
 
 	return nil
 }

@@ -47,6 +47,10 @@ func (v *VolumeManager) DeleteBlock(position int) error {
 		return err
 	}
 
+	if err := v.volumeFile.writeBitMap(v.bitMap.bitMap); err != nil {
+		return fmt.Errorf("error writing bit map: %w", err)
+	}
+
 	return nil
 }
 

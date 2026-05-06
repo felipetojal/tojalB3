@@ -1,6 +1,7 @@
 package metadata
 
 import (
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -47,6 +48,51 @@ func TestStoreManifest(t *testing.T) {
 	// Storing the Manifest.
 	err = db.StoreManifest(m)
 	a.Nil(err)
+}
+
+func TestDeleteManifest(t *testing.T) {
+	// ARRANGE: Setup temporary database
+	tempDir := t.TempDir()
+	dbPath := filepath.Join(tempDir, "test_badger_db")
+
+	db, err := NewDatabase(dbPath)
+	if err != nil {
+		t.Fatalf("failed to create test database: %v", err)
+	}
+
+	// Prepare a fake manifest
+	fileName := "test_delete.txt"
+	mani := NewManifest(fileName, 2048)
+	mani.AddBlock("hash_123")
+	mani.AddBlock("hash_456")
+
+	// Store the manifest first to ensure it exists in the DB
+	err = db.StoreManifest(mani)
+	if err != nil {
+		t.Fatalf("failed to store manifest during setup: %v", err)
+	}
+
+	// ACT 1: Delete the EXISTING manifest
+	err = db.DeleteManifest(fileName)
+	if err != nil {
+		t.Errorf("unexpected error deleting existing manifest: %v", err)
+	}
+
+	// ASSERT 1: Verify it was actually deleted from BadgerDB
+	deletedMani, err := db.LoadManifest(fileName)
+	if deletedMani != nil {
+		t.Errorf("expected manifest to be nil after deletion, but got data")
+	}
+	if err == nil {
+		t.Errorf("expected an error (like key not found) when loading a deleted manifest, got nil")
+	}
+
+	// ACT 2: Delete a NON-EXISTING manifest (Idempotency Test)
+	// Since we chose Option A, deleting a ghost file should succeed silently.
+	err = db.DeleteManifest("ghost_file.txt")
+	if err != nil {
+		t.Errorf("expected no error when deleting a non-existing manifest (idempotency), but got: %v", err)
+	}
 }
 
 func TestLoadManifest(t *testing.T) {
