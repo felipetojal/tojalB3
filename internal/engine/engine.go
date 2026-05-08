@@ -36,6 +36,10 @@ func NewEngine(v *volume.VolumeManager, d *metadata.Database, it *metadata.Index
 	}, nil
 }
 
+func (e *Engine) ListFiles() []string {
+	return e.d.ListFiles()
+}
+
 // StoreFile will receive the filePath, open the file, split it into chunks,
 // and store each chunk in the volume.
 func (e *Engine) StoreFile(filePath string) error {

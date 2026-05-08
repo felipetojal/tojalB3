@@ -10,6 +10,7 @@ import (
 
 	"github.com/felipetojal/tojalB3/internal/metadata"
 	"github.com/felipetojal/tojalB3/internal/volume"
+	"github.com/stretchr/testify/assert"
 )
 
 // setupTestEngine is a helper function to create a clean Engine
@@ -41,6 +42,25 @@ func setupTestEngine(t *testing.T) (*Engine, string) {
 	}
 
 	return eng, tempDir
+}
+
+func TestListFiles(t *testing.T) {
+	eng, tempDir := setupTestEngine(t)
+
+	// Each file that will be stored need to exist and have some content.
+	content := []byte("Hello World")
+	storedFiles := []string{filepath.Join(tempDir, "file1.txt"), filepath.Join(tempDir, "file2.txt"), filepath.Join(tempDir, "file3.txt")}
+	for _, file := range storedFiles {
+		// Creating the files and adding content.
+		err := os.WriteFile(file, content, 0644)
+		assert.NoError(t, err, "failed to create file in disk: %s", file)
+		// Now that the files were created, we store them.
+		err = eng.StoreFile(file)
+		assert.NoError(t, err, "failed to store file %s", file)
+	}
+
+	listFiles := eng.ListFiles()
+	assert.ElementsMatch(t, listFiles, storedFiles)
 }
 
 func TestStoreFile(t *testing.T) {

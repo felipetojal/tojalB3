@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
 
 	badger "github.com/dgraph-io/badger/v4"
 )
@@ -31,6 +32,35 @@ func NewDatabase(dirPath string) (*Database, error) {
 	return &Database{
 		db: db,
 	}, nil
+}
+
+// ListFiles returns a list of all the files stored in the database.
+func (d *Database) ListFiles() []string {
+	files := make([]string, 0)
+
+	// Here we are creating a transaction
+	// and an iterator that will go through
+	// the badger items.
+	txn := d.db.NewTransaction(false)
+	defer txn.Discard()
+	opts := badger.DefaultIteratorOptions
+	opts.PrefetchValues = false
+	it := txn.NewIterator(opts)
+	defer it.Close()
+
+	// Iterating over the badger items and selecting
+	// the manifests.
+	for it.Rewind(); it.Valid(); it.Next() {
+		item := it.Item()
+		k := item.Key()
+		kString := string(k)
+		after, found := strings.CutPrefix(kString, "mani:")
+		if found {
+			files = append(files, after)
+		}
+	}
+
+	return files
 }
 
 // storeManifest is responsible for storing a Manifest in the
