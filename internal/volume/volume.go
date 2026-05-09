@@ -36,6 +36,15 @@ func NewVolumeManager(filePath string) *VolumeManager {
 	}
 }
 
+func (v *VolumeManager) GetBlock(position int) ([]byte, error) {
+	buf, err := v.volumeFile.readBlock(position)
+	if err != nil {
+		return nil, fmt.Errorf("error getting block: %w", err)
+	}
+
+	return buf, nil
+}
+
 // DeleteBlock receives the absolute position of the block
 // and deletes it from the volume and frees the bitmap position.
 func (v *VolumeManager) DeleteBlock(position int) error {

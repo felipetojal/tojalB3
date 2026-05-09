@@ -44,6 +44,96 @@ func setupTestEngine(t *testing.T) (*Engine, string) {
 	return eng, tempDir
 }
 
+func TestGetFile(t *testing.T) {
+	// Scenario: file does not exist in volume
+	t.Run("file does not exist", func(t *testing.T) {
+		eng, tempDir := setupTestEngine(t)
+		fileName := "file1.txt"
+		err := eng.GetFile(fileName, tempDir)
+		assert.Error(t, err, "expected error when getting non-existent file %s", fileName)
+	})
+
+	// Scenario: test padding (File smaller than 1 block)
+	t.Run("Success with Padding Logic", func(t *testing.T) {
+		eng, tempDir := setupTestEngine(t)
+
+		// Creating file with content smaller than 1 block
+		// and asserting its creation.
+		content := []byte("hello world.")
+		fileName := "small.txt"
+		filePath := filepath.Join(tempDir, fileName)
+		f, err := os.Create(filePath)
+		assert.NoError(t, err)
+		assert.NotNil(t, f, "failed to create small file")
+		defer f.Close()
+		n, err := f.Write(content)
+		assert.NoError(t, err, "failed to write small file")
+		assert.Equal(t, len(content), n, "failed to write small file")
+
+		// Storing the file in the databse
+		err = eng.StoreFile(filePath)
+		assert.NoError(t, err, "failed to store small file")
+
+		// Now it´s time to retrieve the file.
+		destDirName := filepath.Join(tempDir, "downloads")
+		err = os.Mkdir(destDirName, 0755)
+		assert.NoError(t, err, "failed to create downloads directory")
+		err = eng.GetFile(filePath, destDirName)
+		assert.NoError(t, err, "failed to get file")
+
+		destFilePath := filepath.Join(destDirName, fileName)
+		destFile, err := os.Open(destFilePath)
+		assert.NoError(t, err, "failed to open destination file")
+		assert.NotNil(t, destFile, "failed to open destination file")
+		defer destFile.Close()
+
+		// Asserting that the bytes saved were also read.
+		bytesRead, err := os.ReadFile(destFilePath)
+		assert.NoError(t, err, "failed to read destination file")
+		assert.Equal(t, bytesRead, content, "failed to read destination file")
+	})
+
+	// Scenario: testing with multiple blocks
+	t.Run("Success with Multiple Blocks", func(t *testing.T) {
+		eng, tempDir := setupTestEngine(t)
+
+		// Creating file with content smaller than 1 block
+		// and asserting its creation.
+		content := bytes.Repeat([]byte("hello world."), 10000)
+		fileName := "big.txt"
+		filePath := filepath.Join(tempDir, fileName)
+		f, err := os.Create(filePath)
+		assert.NoError(t, err)
+		assert.NotNil(t, f, "failed to create big file")
+		defer f.Close()
+		n, err := f.Write(content)
+		assert.NoError(t, err, "failed to write big file")
+		assert.Equal(t, len(content), n, "failed to write big file")
+
+		// Storing the file in the databse
+		err = eng.StoreFile(filePath)
+		assert.NoError(t, err, "failed to store big file")
+
+		// Now it´s time to retrieve the file.
+		destDirName := filepath.Join(tempDir, "downloads")
+		err = os.Mkdir(destDirName, 0755)
+		assert.NoError(t, err, "failed to create downloads directory")
+		err = eng.GetFile(filePath, destDirName)
+		assert.NoError(t, err, "failed to get file")
+
+		destFilePath := filepath.Join(destDirName, fileName)
+		destFile, err := os.Open(destFilePath)
+		assert.NoError(t, err, "failed to open destination file")
+		assert.NotNil(t, destFile, "failed to open destination file")
+		defer destFile.Close()
+
+		// Asserting that the bytes saved were also read.
+		bytesRead, err := os.ReadFile(destFilePath)
+		assert.NoError(t, err, "failed to read destination file")
+		assert.Equal(t, bytesRead, content, "failed to read destination file")
+	})
+}
+
 func TestListFiles(t *testing.T) {
 	eng, tempDir := setupTestEngine(t)
 

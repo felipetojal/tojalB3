@@ -34,6 +34,18 @@ func newFile(filePath string) (*File, error) {
 	}, nil
 }
 
+// readBlock reads a block from the volume file at the given position.
+func (f *File) readBlock(position int) ([]byte, error) {
+	buf := make([]byte, block_size)
+	offset := int64(BitMapSize + (position * block_size))
+	_, err := f.file.ReadAt(buf, offset)
+	if err != nil {
+		return nil, fmt.Errorf("error reading block: %w", err)
+	}
+
+	return buf, nil
+}
+
 // readBitMap reads the bitmap from the volume file.
 func (f *File) readBitMap() ([]byte, error) {
 	// Seek back to the start of the file before reading.
@@ -51,7 +63,7 @@ func (f *File) readBitMap() ([]byte, error) {
 
 // writeBitMap writes the bitmap to the volume file.
 func (f *File) writeBitMap(bitMap []byte) error {
-	_, err := f.file.Write(bitMap)
+	_, err := f.file.WriteAt(bitMap, 0)
 	if err != nil {
 		return fmt.Errorf("error writing bitmap: %w", err)
 	}
@@ -75,7 +87,7 @@ func (f *File) deleteBlock(position int) error {
 // Auxiliary function to store a byte at a given position in the file.
 func (f *File) writeBlock(block []byte, position int) error {
 	// Calculating the absolute offset.
-	offset := int64(BitMapSize + (position * 8))
+	offset := int64(BitMapSize + (position * block_size))
 
 	// Writing the block to the disk.
 	_, err := f.file.WriteAt(block, offset)

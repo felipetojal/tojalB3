@@ -18,7 +18,10 @@ type Database struct {
 	db *badger.DB
 }
 
-const indexTableKey = "indexTable:"
+const (
+	indexTableKey = "indexTable:"
+	manifestKey   = "mani:"
+)
 
 // NewDatabase is the Database constructor. It takes in
 // the directory path used to store the data and returns
@@ -54,7 +57,7 @@ func (d *Database) ListFiles() []string {
 		item := it.Item()
 		k := item.Key()
 		kString := string(k)
-		after, found := strings.CutPrefix(kString, "mani:")
+		after, found := strings.CutPrefix(kString, manifestKey)
 		if found {
 			files = append(files, after)
 		}
@@ -73,7 +76,7 @@ func (d *Database) StoreManifest(m *Manifest) error {
 	}
 
 	// Getting the Manifest key and converting it to bytes.
-	key := []byte("mani:" + m.FileName)
+	key := []byte(manifestKey + m.FileName)
 
 	// Creating the transaction.
 	txn := d.db.NewTransaction(true)
@@ -95,7 +98,7 @@ func (d *Database) StoreManifest(m *Manifest) error {
 // the database. It receives the Manifest key as a parameter.
 func (d *Database) LoadManifest(key string) (*Manifest, error) {
 	// Converting key from string to bytes.
-	keyBytes := []byte("mani:" + key)
+	keyBytes := []byte(manifestKey + key)
 
 	// Creating a transaction and loading object from
 	// the database.
@@ -131,7 +134,7 @@ func (d *Database) DeleteManifest(key string) error {
 	defer txn.Discard()
 
 	// Creating the ley and deleting the manifest.
-	manifestKey := []byte("mani:" + key)
+	manifestKey := []byte(manifestKey + key)
 	if err := txn.Delete(manifestKey); err != nil {
 		return fmt.Errorf("error deleting manifest from database: %w", err)
 	}

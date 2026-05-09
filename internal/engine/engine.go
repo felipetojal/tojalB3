@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 
 	"github.com/felipetojal/tojalB3/internal/hash"
 	"github.com/felipetojal/tojalB3/internal/metadata"
@@ -36,6 +37,72 @@ func NewEngine(v *volume.VolumeManager, d *metadata.Database, it *metadata.Index
 	}, nil
 }
 
+// GetFile retrieves a file from the engine and writes it to the destination directory.
+func (e *Engine) GetFile(filePath string, destDir string) error {
+	m, err := e.d.LoadManifest(filePath)
+	if err != nil {
+		return fmt.Errorf("error getting manifest: %w", err)
+	}
+
+	destFile, err := createDestFile(destDir, m.FileName)
+	if err != nil {
+		return fmt.Errorf("error creating destination file: %w", err)
+	}
+	defer destFile.Close()
+
+	var bytesWritten int64
+	mSize := m.FileSize
+
+	for _, blockHash := range m.Blocks {
+		index, exists := e.it.Indexes[blockHash]
+		if !exists {
+			err = fmt.Errorf("block hash not found: %s", blockHash)
+			break
+		}
+		position := index.Address
+
+		block, err := e.v.GetBlock(position)
+		if err != nil {
+			err = fmt.Errorf("error getting block: %w", err)
+			break
+		}
+
+		if bytesWritten+block_size >= mSize {
+			remainingBytes := mSize - bytesWritten
+			block = block[:remainingBytes]
+		}
+
+		n, err := destFile.Write(block)
+		if err != nil {
+			err = fmt.Errorf("error writing block (%d bytes): %w", n, err)
+			break
+		}
+
+		bytesWritten += int64(n)
+	}
+
+	if err != nil {
+		os.RemoveAll(destFile.Name())
+		return fmt.Errorf("error writing file: %w", err)
+	}
+
+	return nil
+}
+
+// createDestFile creates a destination file in the specified directory.
+func createDestFile(destDir, fileName string) (*os.File, error) {
+	// This will assert that we get only the file name.
+	cleanName := filepath.Base(fileName)
+
+	destFileName := filepath.Join(destDir, cleanName)
+	destFile, err := os.Create(destFileName)
+	if err != nil {
+		return nil, fmt.Errorf("error creating destination file: %w", err)
+	}
+	return destFile, nil
+}
+
+// ListFiles returns a list of all files stored in the engine.
 func (e *Engine) ListFiles() []string {
 	return e.d.ListFiles()
 }
