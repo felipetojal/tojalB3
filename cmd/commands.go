@@ -11,62 +11,85 @@ import (
 )
 
 var (
-	eng            *engine.Engine
-	destFilePath   string
-	originFilePath string
+	eng *engine.Engine
 
 	dbDirPath  = "./badger-data"
 	volumePath = "./volume.dat"
 
 	rootCmd = &cobra.Command{
-		Use:   "TojalB3",
+		Use:   "tojalB3",
 		Short: "Local Block Storage Engine",
 		Long:  "TojalB3 is a Block Storage Engine implementation",
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			db, err := metadata.NewDatabase(dbDirPath)
 			if err != nil {
-				log.Printf("Error creating engine: %v", err)
+				fmt.Printf("Error creating engine: %v", err)
 				return fmt.Errorf("failed to create database: %w", err)
 			}
 			log.Println("Database successfully initialized!")
 
 			v := volume.NewVolumeManager(volumePath)
-			log.Println("Volume successfully loaded!")
+			fmt.Println("Volume successfully loaded!")
 
 			it, err := db.LoadIndexTable()
 			if err != nil {
-				log.Printf("Error creating engine: %v", err)
+				fmt.Printf("Error creating engine: %v", err)
 				return fmt.Errorf("failed to load index table: %w", err)
 			}
-			log.Println("Index Table loaded!")
+			fmt.Println("Index Table loaded!")
 
 			eng, err = engine.NewEngine(v, db, it)
 			if err != nil {
-				log.Printf("Error creating engine: %v", err)
+				fmt.Printf("Error creating engine: %v", err)
 				return fmt.Errorf("failed to create engine: %w", err)
 			}
-			log.Println("Engine created!")
+			fmt.Println("Engine created!")
 
 			return nil
 		},
 	}
 
 	storeCmd = &cobra.Command{
-		Use:   "Store command",
+		Use:   "store",
 		Short: "This command is used to store a file in the block storage engine.",
 		Run: func(cmd *cobra.Command, args []string) {
 			file := args[0]
-			log.Println("Store command was called...")
-			log.Printf("File: %v\n", file)
+			fmt.Println("Store command was called...")
+			fmt.Printf("File: %v\n", file)
 
 			if err := eng.StoreFile(file); err != nil {
 				log.Fatal("Error: Unable to store file: %w", err)
 			}
 
-			log.Println("File was stored successfully!")
+			fmt.Println("File was stored successfully!")
+		},
+	}
+
+	getCmd = &cobra.Command{
+		Use:   "get",
+		Short: "This command is used to retrieve a file from the block storage engine.",
+		Run: func(cmd *cobra.Command, args []string) {
+			if len(args) != 2 {
+				fmt.Println("Usage: get <file> <output_path>")
+				return
+			}
+			file := args[0]
+			outputPath := args[1]
+			fmt.Println("Get command was called.")
+
+			if err := eng.GetFile(file, outputPath); err != nil {
+				fmt.Println("Error: Unable to get file: %w", err)
+				return
+			}
+			fmt.Println("File was retrieved successfully!")
 		},
 	}
 )
+
+func init() {
+	rootCmd.AddCommand(storeCmd)
+	rootCmd.AddCommand(getCmd)
+}
 
 func Execute() error {
 	if err := rootCmd.Execute(); err != nil {
