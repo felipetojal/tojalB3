@@ -20,12 +20,6 @@ type Engine struct {
 	it *metadata.IndexTable
 }
 
-/*
-What is Engine responsible for?
-1 - It must support four operations: store file, load file, delete file, and list all files.
-2 - When storing the file, it must convert it into chunks and store it in the volume.
-*/
-
 const block_size = 4096
 
 // Engine constructor.
@@ -87,19 +81,6 @@ func (e *Engine) GetFile(filePath string, destDir string) error {
 	}
 
 	return nil
-}
-
-// createDestFile creates a destination file in the specified directory.
-func createDestFile(destDir, fileName string) (*os.File, error) {
-	// This will assert that we get only the file name.
-	cleanName := filepath.Base(fileName)
-
-	destFileName := filepath.Join(destDir, cleanName)
-	destFile, err := os.Create(destFileName)
-	if err != nil {
-		return nil, fmt.Errorf("error creating destination file: %w", err)
-	}
-	return destFile, nil
 }
 
 // ListFiles returns a list of all files stored in the engine.
@@ -288,4 +269,17 @@ func openFile(filePath string) (*os.File, int64, error) {
 	fileSize := fileInfo.Size()
 
 	return f, fileSize, nil
+}
+
+// createDestFile creates a destination file in the specified directory.
+func createDestFile(destDir, fileName string) (*os.File, error) {
+	// This will assert that we get only the file name.
+	cleanName := filepath.Base(fileName)
+
+	destFileName := filepath.Join(destDir, cleanName)
+	destFile, err := os.Create(destFileName)
+	if err != nil {
+		return nil, fmt.Errorf("error creating destination file: %w", err)
+	}
+	return destFile, nil
 }

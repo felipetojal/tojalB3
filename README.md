@@ -18,7 +18,6 @@ Block Storage Engine built to replicate the core fundamentals and logic behind e
 ## TECH STACK
 
 * **Language:** Go
-* **TUI Framework:** [Bubble Tea](https://github.com/charmbracelet/bubbletea)
 * **Metadata Database:** [BadgerDB](https://github.com/dgraph-io/badger)
 
 ## ARCHITECTURE
