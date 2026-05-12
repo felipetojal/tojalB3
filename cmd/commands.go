@@ -47,6 +47,12 @@ var (
 
 			return nil
 		},
+
+		PersistentPostRun: func(cmd *cobra.Command, args []string) {
+			if err := eng.Close(); err != nil {
+				fmt.Println("Error closing database.")
+			}
+		},
 	}
 
 	storeCmd = &cobra.Command{

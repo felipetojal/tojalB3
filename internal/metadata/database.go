@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"sync"
 
 	badger "github.com/dgraph-io/badger/v4"
 )
@@ -15,7 +16,8 @@ type Storable interface {
 
 // Database encapsulates the badger.DB type.
 type Database struct {
-	db *badger.DB
+	db    *badger.DB
+	mutex sync.RWMutex
 }
 
 const (
@@ -33,12 +35,16 @@ func NewDatabase(dirPath string) (*Database, error) {
 	}
 
 	return &Database{
-		db: db,
+		db:    db,
+		mutex: sync.RWMutex{},
 	}, nil
 }
 
 // ListFiles returns a list of all the files stored in the database.
 func (d *Database) ListFiles() []string {
+	d.mutex.RLock()
+	defer d.mutex.RUnlock()
+
 	files := make([]string, 0)
 
 	// Here we are creating a transaction
@@ -69,6 +75,9 @@ func (d *Database) ListFiles() []string {
 // storeManifest is responsible for storing a Manifest in the
 // database. It returns an error in case of failure
 func (d *Database) StoreManifest(m *Manifest) error {
+	d.mutex.Lock()
+	defer d.mutex.Unlock()
+
 	// Converting the Manifest to bytes.
 	mBytes, err := json.Marshal(m)
 	if err != nil {
@@ -97,6 +106,9 @@ func (d *Database) StoreManifest(m *Manifest) error {
 // loadManifest is responsible for loading a Manifest from
 // the database. It receives the Manifest key as a parameter.
 func (d *Database) LoadManifest(key string) (*Manifest, error) {
+	d.mutex.RLock()
+	defer d.mutex.RUnlock()
+
 	// Converting key from string to bytes.
 	keyBytes := []byte(manifestKey + key)
 
@@ -129,6 +141,9 @@ func (d *Database) LoadManifest(key string) (*Manifest, error) {
 // If the file is not found or an error occur, an error will be returned.
 // If the file is deleted successfully, error will be nil.
 func (d *Database) DeleteManifest(key string) error {
+	d.mutex.Lock()
+	defer d.mutex.Unlock()
+
 	// Creating the database transaction.
 	txn := d.db.NewTransaction(true)
 	defer txn.Discard()
@@ -207,4 +222,8 @@ func (d *Database) LoadIndexTable() (*IndexTable, error) {
 	}
 
 	return &it, nil
+}
+
+func (d *Database) Close() error {
+	return d.db.Close()
 }

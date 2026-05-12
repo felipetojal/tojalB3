@@ -283,3 +283,7 @@ func createDestFile(destDir, fileName string) (*os.File, error) {
 	}
 	return destFile, nil
 }
+
+func (e *Engine) Close() error {
+	return e.d.Close()
+}
