@@ -118,17 +118,17 @@ var (
 		Use:   "list",
 		Short: "This command is used to list all the files stored in the block engine.",
 		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Println("List command was called.")
+			cmd.Println("List command was called.")
 
 			files := eng.ListFiles()
 
 			if len(files) == 0 {
-				fmt.Println("No files found.")
+				cmd.Println("No files found.")
 				return
 			}
 
 			for _, file := range files {
-				fmt.Println(file)
+				cmd.Println(file)
 			}
 		},
 	}

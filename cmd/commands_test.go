@@ -62,6 +62,36 @@ func TestDeleteCommand(t *testing.T) {
 	assert.NoError(t, err)
 }
 
+func TestListCommand(t *testing.T) {
+	tempDir := setupTestEnvironment(t)
+
+	filename := "teste1.txt"
+	f, filePath := createTestFile(t, filename, tempDir)
+	defer f.Close()
+
+	content := "1"
+	size := 9000
+	storeContentTestFile(t, f, content, size)
+
+	_, _, err := executeCommandC(rootCmd, "store", filePath)
+	assert.NoError(t, err)
+
+	filename2 := "teste2.txt"
+	f2, filePath2 := createTestFile(t, filename2, tempDir)
+	defer f2.Close()
+
+	storeContentTestFile(t, f2, content, size)
+
+	_, _, err = executeCommandC(rootCmd, "store", filePath2)
+	assert.NoError(t, err)
+
+	_, output, err := executeCommandC(rootCmd, "list")
+	assert.NoError(t, err)
+
+	assert.Contains(t, output, filename)
+	assert.Contains(t, output, filename2)
+}
+
 func setupTestEnvironment(t *testing.T) string {
 	t.Helper()
 	tempDir := t.TempDir()
